@@ -23,13 +23,13 @@ open class TableViewSectionedDataSource<S: SectionModelType>
     public typealias Section = S
 
     public typealias ConfigureCell = (TableViewSectionedDataSource<S>, UITableView, IndexPath, I) -> UITableViewCell
-    public typealias ConfigureSectionTitleView = (TableViewSectionedDataSource<S>, UITableView, Int) -> UIView?
     public typealias TitleForHeaderInSection = (TableViewSectionedDataSource<S>, Int) -> String?
     public typealias TitleForFooterInSection = (TableViewSectionedDataSource<S>, Int) -> String?
     public typealias CanEditRowAtIndexPath = (TableViewSectionedDataSource<S>, IndexPath) -> Bool
     public typealias CanMoveRowAtIndexPath = (TableViewSectionedDataSource<S>, IndexPath) -> Bool
 
     #if os(iOS)
+        public typealias ConfigureSectionTitleView = (TableViewSectionedDataSource<S>, UITableView, Int) -> UIView?
         public typealias SectionIndexTitles = (TableViewSectionedDataSource<S>) -> [String]?
         public typealias SectionForSectionIndexTitle = (TableViewSectionedDataSource<S>, _ title: String, _ index: Int) -> Int
     #endif
@@ -37,7 +37,7 @@ open class TableViewSectionedDataSource<S: SectionModelType>
     #if os(iOS)
         public init(
                 configureCell: @escaping ConfigureCell,
-                configureSectionTitleView: @escaping ConfigureSectionTitleView = { _, _ in nil },
+                configureSectionTitleView: @escaping ConfigureSectionTitleView = { _, _, _ in nil },
                 titleForHeaderInSection: @escaping  TitleForHeaderInSection = { _, _ in nil },
                 titleForFooterInSection: @escaping TitleForFooterInSection = { _, _ in nil },
                 canEditRowAtIndexPath: @escaping CanEditRowAtIndexPath = { _, _ in false },
@@ -128,14 +128,6 @@ open class TableViewSectionedDataSource<S: SectionModelType>
         }
     }
     
-    open var configureSectionTitleView: ConfigureSectionTitleView {
-        didSet {
-            #if DEBUG
-                ensureNotMutatedAfterBinding()
-            #endif
-        }
-    }
-    
     open var titleForHeaderInSection: TitleForHeaderInSection {
         didSet {
             #if DEBUG
@@ -169,6 +161,13 @@ open class TableViewSectionedDataSource<S: SectionModelType>
     open var rowAnimation: UITableViewRowAnimation = .automatic
 
     #if os(iOS)
+    open var configureSectionTitleView: ConfigureSectionTitleView {
+        didSet {
+            #if DEBUG
+                ensureNotMutatedAfterBinding()
+            #endif
+        }
+    }
     open var sectionIndexTitles: SectionIndexTitles {
         didSet {
             #if DEBUG
