@@ -23,6 +23,7 @@ open class TableViewSectionedDataSource<S: SectionModelType>
     public typealias Section = S
 
     public typealias ConfigureCell = (TableViewSectionedDataSource<S>, UITableView, IndexPath, I) -> UITableViewCell
+    public typealias ConfigureSectionTitleView = (TableViewSectionedDataSource<S>, UITableView, Int) -> UIView?
     public typealias TitleForHeaderInSection = (TableViewSectionedDataSource<S>, Int) -> String?
     public typealias TitleForFooterInSection = (TableViewSectionedDataSource<S>, Int) -> String?
     public typealias CanEditRowAtIndexPath = (TableViewSectionedDataSource<S>, IndexPath) -> Bool
@@ -36,6 +37,7 @@ open class TableViewSectionedDataSource<S: SectionModelType>
     #if os(iOS)
         public init(
                 configureCell: @escaping ConfigureCell,
+                configureSectionTitleView: @escaping ConfigureSectionTitleView = { _, _ in nil },
                 titleForHeaderInSection: @escaping  TitleForHeaderInSection = { _, _ in nil },
                 titleForFooterInSection: @escaping TitleForFooterInSection = { _, _ in nil },
                 canEditRowAtIndexPath: @escaping CanEditRowAtIndexPath = { _, _ in false },
@@ -44,6 +46,7 @@ open class TableViewSectionedDataSource<S: SectionModelType>
                 sectionForSectionIndexTitle: @escaping SectionForSectionIndexTitle = { _, _, index in index }
             ) {
             self.configureCell = configureCell
+            self.configureSectionTitleView = configureSectionTitleView
             self.titleForHeaderInSection = titleForHeaderInSection
             self.titleForFooterInSection = titleForFooterInSection
             self.canEditRowAtIndexPath = canEditRowAtIndexPath
@@ -125,6 +128,14 @@ open class TableViewSectionedDataSource<S: SectionModelType>
         }
     }
     
+    open var configureSectionTitleView: ConfigureSectionTitleView {
+        didSet {
+            #if DEBUG
+                ensureNotMutatedAfterBinding()
+            #endif
+        }
+    }
+    
     open var titleForHeaderInSection: TitleForHeaderInSection {
         didSet {
             #if DEBUG
@@ -190,6 +201,9 @@ open class TableViewSectionedDataSource<S: SectionModelType>
         precondition(indexPath.item < _sectionModels[indexPath.section].items.count)
         
         return configureCell(self, tableView, indexPath, self[indexPath])
+    }
+    open func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        return configureSectionTitleView(self, tableView, section)
     }
     
     open func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
